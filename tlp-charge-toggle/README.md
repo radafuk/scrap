@@ -117,7 +117,7 @@ Fast Standard [Long_Life]
 
 Square brackets identify the active charge type. For the TLP `lenovo` plugin using the `ideapad_laptop` vendor interface:
 
-- `Standard` → **Full charge**
+- `Standard` (raw kernel name) → **Full charge**
 - `Long_Life` → **Charge limit**
 
 The actual percentage represented by `Long_Life` is firmware-defined; on many Lenovo systems it is a factory battery-care limit rather than an arbitrary numeric threshold.
