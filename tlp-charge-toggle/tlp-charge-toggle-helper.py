@@ -54,11 +54,21 @@ TLP_SEARCH_PATHS = (
     "/bin/tlp",
 )
 
-# Linux power-supply drivers that support charge thresholds commonly expose
-# this sysfs attribute. We use it only for read-only UI state detection.
+# Linux power-supply drivers expose charge-control state in different ways.
+#
+# Many drivers provide a numeric end threshold:
 END_THRESHOLD_GLOB = (
     "/sys/class/power_supply/BAT*/charge_control_end_threshold"
 )
+
+# Lenovo's ideapad_laptop driver can instead expose symbolic charge modes in a
+# file such as:
+#
+#     Fast Standard [Long_Life]
+#
+# Square brackets mark the active type. TLP maps its charge-threshold setting
+# to Standard (normal/full charging) or Long_Life (battery-care mode).
+CHARGE_TYPES_GLOB = "/sys/class/power_supply/BAT*/charge_types"
 
 
 def fail(message: str, code: int = 1) -> NoReturn:
@@ -92,14 +102,26 @@ def find_tlp() -> str:
     fail("TLP executable not found in the expected system paths.")
 
 
-def read_end_threshold() -> tuple[str | None, int | None]:
-    """Read the first usable battery end-charge threshold exposed by sysfs.
+def read_charge_state() -> tuple[str | None, str, int | None, str | None]:
+    """Read the active charge mode from kernel power-supply sysfs.
+
+    Detection is intentionally read-only and does not call TLP.
+
+    First choice: numeric charge_control_end_threshold
+        100 or above -> "full"
+        below 100    -> "care"
+
+    Lenovo ideapad_laptop fallback: charge_types
+        Example: "Fast Standard [Long_Life]"
+
+        The bracketed value is active:
+            Standard  -> "full"
+            Long_Life -> "care"
 
     Returns:
-        (battery_name, threshold_percent)
+        (battery_name, mode, numeric_threshold, active_charge_type)
 
-    If no compatible battery attribute can be read, both values are None.
-    Reading sysfs here does not require root on normal systems.
+    If neither interface provides a recognized state, mode is "unknown".
     """
 
     for raw_path in sorted(glob.glob(END_THRESHOLD_GLOB)):
@@ -107,14 +129,36 @@ def read_end_threshold() -> tuple[str | None, int | None]:
         try:
             threshold = int(path.read_text(encoding="utf-8").strip())
         except (OSError, ValueError):
-            # A battery can disappear, a driver may deny access, or a value may
-            # be malformed. Try another BAT* device before reporting unknown.
             continue
 
-        return path.parent.name, threshold
+        return (
+            path.parent.name,
+            "full" if threshold >= 100 else "care",
+            threshold,
+            None,
+        )
 
-    return None, None
+    for raw_path in sorted(glob.glob(CHARGE_TYPES_GLOB)):
+        path = Path(raw_path)
+        try:
+            value = path.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
 
+        active = None
+        for token in value.split():
+            if token.startswith("[") and token.endswith("]"):
+                active = token[1:-1]
+                break
+
+        if active == "Standard":
+            return path.parent.name, "full", None, active
+        if active == "Long_Life":
+            return path.parent.name, "care", None, active
+        if active is not None:
+            return path.parent.name, "unknown", None, active
+
+    return None, "unknown", None, None
 
 def print_status() -> None:
     """Emit a small JSON object consumed by the GNOME extension.
@@ -130,14 +174,7 @@ def print_status() -> None:
     reboot, or an external TLP command.
     """
 
-    battery, threshold = read_end_threshold()
-
-    if threshold is None:
-        mode = "unknown"
-    elif threshold >= 100:
-        mode = "full"
-    else:
-        mode = "care"
+    battery, mode, threshold, charge_type = read_charge_state()
 
     print(
         json.dumps(
@@ -145,6 +182,7 @@ def print_status() -> None:
                 "battery": battery,
                 "mode": mode,
                 "stop_threshold": threshold,
+                "charge_type": charge_type,
             },
             separators=(",", ":"),
         )
