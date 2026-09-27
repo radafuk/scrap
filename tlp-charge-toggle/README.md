@@ -86,7 +86,11 @@ If you do not want passwordless operation, edit the policy before installation a
 
 ## Status detection
 
-The tile reads:
+The tile reads kernel power-supply state directly. It does not parse human-readable `tlp-stat` output.
+
+### Numeric threshold drivers
+
+First it looks for:
 
 ```text
 /sys/class/power_supply/BAT*/charge_control_end_threshold
@@ -96,11 +100,29 @@ Interpretation:
 
 - end threshold at 100 → **Full charge**
 - end threshold below 100 → **Charge limit**
-- no readable threshold → **Unavailable**
 
-This keeps status detection independent from parsing human-readable TLP output.
+### Lenovo ideapad_laptop fallback
 
-Hardware and kernel-driver support varies. If your laptop does not expose a charge threshold there, the button can still be installed, but its state cannot be displayed reliably and it will show **Unavailable**.
+Some Lenovo firmware exposes no numeric threshold. Instead, the kernel driver provides:
+
+```text
+/sys/class/power_supply/BAT*/charge_types
+```
+
+A typical value is:
+
+```text
+Fast Standard [Long_Life]
+```
+
+Square brackets identify the active charge type. For the TLP `lenovo` plugin using the `ideapad_laptop` vendor interface:
+
+- `Standard` → **Full charge**
+- `Long_Life` → **Charge limit**
+
+The actual percentage represented by `Long_Life` is firmware-defined; on many Lenovo systems it is a factory battery-care limit rather than an arbitrary numeric threshold.
+
+If neither supported kernel interface exposes a recognizable state, the tile shows **Unavailable**.
 
 ## Requirements
 
@@ -188,13 +210,18 @@ gnome-extensions enable tlp-charge-toggle@radafuk
 
 ### The tile says “Unavailable”
 
-Check whether the kernel exposes a charge-control threshold:
+Check the kernel interfaces used by the detector:
 
 ```bash
-cat /sys/class/power_supply/BAT*/charge_control_end_threshold
+cat /sys/class/power_supply/BAT*/charge_control_end_threshold 2>/dev/null
+cat /sys/class/power_supply/BAT*/charge_types 2>/dev/null
 ```
 
-If that path does not exist, status detection is not available on that hardware/driver combination.
+If neither produces a recognized state, open an issue and include the relevant battery section from:
+
+```bash
+sudo tlp-stat -b
+```
 
 ### A click fails
 
