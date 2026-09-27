@@ -9,6 +9,13 @@ It adds exactly one tile to GNOME Quick Settings:
 
 The extension does **not** choose your charging thresholds. Configure those in TLP itself. This button only switches between TLP's temporary full-charge mode and your normal configured thresholds.
 
+
+## What it looks like
+
+![TLP Charge Toggle in GNOME Quick Settings: Long Life and Full Charge](screenshots/tlp-charge-toggle-states.jpg)
+
+Left: **Long Life**. Right: **Full Charge**.
+
 ## Why this exists
 
 TLP already provides the commands. The inconvenient part is opening a terminal and using root privileges every time you want to temporarily charge to 100%, then restoring the normal battery-preservation thresholds later.
