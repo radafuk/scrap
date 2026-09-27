@@ -115,7 +115,7 @@ def read_charge_state() -> tuple[str | None, str, int | None, str | None]:
         Example: "Fast Standard [Long_Life]"
 
         The bracketed value is active:
-            Standard  -> "full"
+            Standard  -> "full" (displayed as “Full charge”)
             Long_Life -> "care"
 
     Returns:
