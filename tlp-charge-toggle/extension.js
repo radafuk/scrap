@@ -85,7 +85,7 @@ const ChargeToggle = GObject.registerClass(
 class ChargeToggle extends QuickSettings.QuickToggle {
     constructor(extension) {
         super({
-            title: 'Charge to 100%',
+            title: 'TLP',
             subtitle: 'Checking…',
             iconName: 'battery-level-100-charged-symbolic',
             toggleMode: true,
@@ -123,7 +123,7 @@ class ChargeToggle extends QuickSettings.QuickToggle {
                  * authoritative. The finally block immediately rereads the
                  * actual kernel state.
                  */
-                Main.notify('TLP Charge Toggle', error.message);
+                Main.notify('TLP', error.message);
             } finally {
                 this._changing = false;
                 await this._extension.refresh();
@@ -139,17 +139,17 @@ class ChargeToggle extends QuickSettings.QuickToggle {
 
         if (status?.mode === 'full') {
             this.checked = true;
-            this.subtitle = 'Enabled';
+            this.subtitle = 'Full Charge';
         } else if (status?.mode === 'care') {
             this.checked = false;
-            this.subtitle = 'Disabled';
+            this.subtitle = 'Long Life';
         } else {
             /*
              * Unknown normally means the kernel/driver exposes no readable
              * charge_control_end_threshold attribute.
              */
             this.checked = false;
-            this.subtitle = 'Unavailable';
+            this.subtitle = 'Can’t detect';
         }
     }
 });
