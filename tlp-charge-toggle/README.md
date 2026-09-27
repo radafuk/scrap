@@ -4,8 +4,8 @@ A small GNOME Shell Quick Settings extension for laptops that already use [TLP](
 
 It adds exactly one tile to GNOME Quick Settings:
 
-- **Full charge** — runs `tlp fullcharge`
-- **Charge limit** — runs `tlp setcharge`
+- **Full Charge** — runs `tlp fullcharge`
+- **Long Life** — runs `tlp setcharge`
 
 The extension does **not** choose your charging thresholds. Configure those in TLP itself. This button only switches between TLP's temporary full-charge mode and your normal configured thresholds.
 
@@ -98,8 +98,8 @@ First it looks for:
 
 Interpretation:
 
-- end threshold at 100 → **Full charge**
-- end threshold below 100 → **Charge limit**
+- end threshold at 100 → **Full Charge**
+- end threshold below 100 → **Long Life**
 
 ### Lenovo ideapad_laptop fallback
 
@@ -117,12 +117,12 @@ Fast Standard [Long_Life]
 
 Square brackets identify the active charge type. For the TLP `lenovo` plugin using the `ideapad_laptop` vendor interface:
 
-- `Standard` (raw kernel name) → **Full charge**
-- `Long_Life` → **Charge limit**
+- `Standard` (raw kernel name) → **Full Charge**
+- `Long_Life` → **Long Life**
 
 The actual percentage represented by `Long_Life` is firmware-defined; on many Lenovo systems it is a factory battery-care limit rather than an arbitrary numeric threshold.
 
-If neither supported kernel interface exposes a recognizable state, the tile shows **Unavailable**.
+If neither supported kernel interface exposes a recognizable state, the tile shows **Can’t detect**.
 
 ## Requirements
 
@@ -208,7 +208,7 @@ Log out and back in once, then:
 gnome-extensions enable tlp-charge-toggle@radafuk
 ```
 
-### The tile says “Unavailable”
+### The tile says “Can’t detect”
 
 Check the kernel interfaces used by the detector:
 
