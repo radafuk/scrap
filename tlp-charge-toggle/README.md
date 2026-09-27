@@ -12,7 +12,7 @@ The extension does **not** choose your charging thresholds. Configure those in T
 
 ## What it looks like
 
-![TLP Charge Toggle in GNOME Quick Settings: Long Life and Full Charge](screenshots/tlp-charge-toggle-states.jpg)
+![TLP Charge Toggle in GNOME Quick Settings: Long Life and Full Charge](screenshots/tlp-charge-toggle-states.webp)
 
 Left: **Long Life**. Right: **Full Charge**.
 
