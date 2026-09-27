@@ -85,7 +85,7 @@ const ChargeToggle = GObject.registerClass(
 class ChargeToggle extends QuickSettings.QuickToggle {
     constructor(extension) {
         super({
-            title: 'TLP Charge Toggle',
+            title: 'Charge to 100%',
             subtitle: 'Checking…',
             iconName: 'battery-level-100-charged-symbolic',
             toggleMode: true,
@@ -139,14 +139,10 @@ class ChargeToggle extends QuickSettings.QuickToggle {
 
         if (status?.mode === 'full') {
             this.checked = true;
-            this.subtitle = threshold == null
-                ? 'Full charge'
-                : `Full charge · ${threshold}%`;
+            this.subtitle = 'Enabled';
         } else if (status?.mode === 'care') {
             this.checked = false;
-            this.subtitle = threshold == null
-                ? 'Charge limit'
-                : `Charge limit · ${threshold}%`;
+            this.subtitle = 'Disabled';
         } else {
             /*
              * Unknown normally means the kernel/driver exposes no readable
