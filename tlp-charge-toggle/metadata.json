@@ -1,0 +1,6 @@
+{
+  "uuid": "tlp-charge-toggle@radafuk",
+  "name": "TLP Charge Toggle",
+  "description": "Quick Settings toggle for TLP fullcharge and configured charge thresholds.",
+  "shell-version": ["45", "46", "47", "48"]
+}

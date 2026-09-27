@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TLP Charge Toggle polkit policy
+
+  The GNOME extension itself stays unprivileged. When the user clicks the tile,
+  it runs:
+
+      pkexec /usr/local/libexec/tlp-charge-toggle-helper fullcharge
+
+  or:
+
+      pkexec /usr/local/libexec/tlp-charge-toggle-helper setcharge
+
+  pkexec asks polkit whether that exact installed helper may run as root.
+
+  allow_active=yes means an ACTIVE LOCAL SESSION may perform the action without
+  entering a password every time. This choice is intentional for a desktop
+  toggle. It does not authorize arbitrary root commands: the helper is a
+  root-owned program with its own strict command allow-list.
+
+  People who prefer authentication on every change can replace allow_active
+  with an authentication-requiring polkit value before installing.
+-->
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+
+<policyconfig>
+  <vendor>TLP Charge Toggle</vendor>
+
+  <action id="org.tlpchargetoggle.change">
+    <description>Change TLP battery charge mode</description>
+    <message>Change TLP battery charge mode</message>
+
+    <defaults>
+      <!-- Never authorize remote/unknown sessions. -->
+      <allow_any>no</allow_any>
+
+      <!-- Do not authorize a logged-in but inactive local session. -->
+      <allow_inactive>no</allow_inactive>
+
+      <!--
+        Active local desktop session: no repeated password prompt.
+        The root helper remains limited to fullcharge/setcharge.
+      -->
+      <allow_active>yes</allow_active>
+    </defaults>
+
+    <!-- Bind this policy to the exact root-owned helper installed by install.sh. -->
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/libexec/tlp-charge-toggle-helper</annotate>
+  </action>
+</policyconfig>
